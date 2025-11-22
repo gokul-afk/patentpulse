@@ -16,6 +16,14 @@ activate-env:
 run-ai:
 	cd ai-service && powershell -ExecutionPolicy Bypass -File run_ai.ps1
 
+.PHONY: run-backend
+run-backend:
+	powershell -ExecutionPolicy Bypass -File run_backend.ps1
+
+.PHONY: run-all
+run-all:
+	powershell -ExecutionPolicy Bypass -File run_all.ps1
+
 # Windows users:
 #   Set VIRTUAL_ENV_ACTIVATE to the correct activation command for your shell.
 #   Example for PowerShell:
