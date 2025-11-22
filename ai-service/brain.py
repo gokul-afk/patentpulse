@@ -1,28 +1,88 @@
 # brain.py - PatentPulse AI Service (FastAPI)
 import random
 import time
-from fastapi import FastAPI, Request
+import uvicorn
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
 
 app = FastAPI()
 
+# --- Input Schema ---
 class AnalyzeRequest(BaseModel):
     content: str
 
-class AnalyzeResponse(BaseModel):
-    score: int
-    entities: List[str]
+# --- The "Chaos" Logic ---
+def simulate_ai_processing():
+    """
+    Simulates a heavy NLP model. 
+    Includes a 'Chaos' factor to test the Go Circuit Breaker.
+    """
+    delay = random.uniform(0.5, 2.0) # Normal processing time
+    
+    # 20% chance of a "Stall" (Simulating a hung GPU or heavy load)
+    # This forces the Go backend to trigger its 5s timeout.
+    if random.random() < 0.2:
+        print("⚠️  SIMULATING STALL (Sleeping 10s)...")
+        time.sleep(10) 
+    else:
+        time.sleep(delay)
 
-@app.post("/analyze", response_model=AnalyzeResponse)
-async def analyze(req: AnalyzeRequest):
-    # Chaos Mode: Random delay to simulate slow/hanging AI
-    delay = random.choice([0.2, 0.5, 1, 2, 6])  # 6s triggers circuit breaker in Go
-    time.sleep(delay)
-    # Simulate risk score and entity extraction
-    score = random.randint(10, 100)
-    entities = ["US Patent 998...", "Google", "Liability", "Pending"]
-    return AnalyzeResponse(score=score, entities=entities[:random.randint(1, len(entities))])
+    return delay
 
-# To run:
-# uvicorn brain:app --host 0.0.0.0 --port 5000
+# --- The Analysis Logic ---
+def analyze_text(text: str):
+    """
+    Simple keyword extraction to simulate 'Risk Analysis'.
+    In production, this would call OpenAI or a local BERT model.
+    """
+    keywords = []
+    risk_score = 0
+    
+    text_lower = text.lower()
+    
+    # Risk triggers (Legal domain)
+    triggers = {
+        "infringement": 20,
+        "liability": 15,
+        "damages": 10,
+        "unlicensed": 25,
+        "prohibited": 20,
+        "audit": 10
+    }
+    
+    for word, score in triggers.items():
+        if word in text_lower:
+            keywords.append(word)
+            risk_score += score
+            
+    # Cap score at 100
+    risk_score = min(risk_score, 100)
+    
+    # Baseline score if no keywords found (just to show data)
+    if risk_score == 0:
+        risk_score = random.randint(5, 15)
+        keywords = ["low_risk", "generic"]
+        
+    return risk_score, keywords
+
+# --- API Endpoint ---
+@app.post("/analyze")
+async def analyze(request: AnalyzeRequest):
+    print(f"📥 Received analysis request ({len(request.content)} bytes)")
+    
+    # 1. Run the Chaos Simulation
+    simulate_ai_processing()
+    
+    # 2. Perform Analysis
+    score, keywords = analyze_text(request.content)
+    
+    print(f"✅ Processed: Risk {score} | Keywords {keywords}")
+    return {
+        "risk_score": score, 
+        "keywords": keywords,
+        "status": "processed"
+    }
+
+if __name__ == "__main__":
+    print("🧠 PatentPulse AI Brain starting on port 5000...")
+    uvicorn.run(app, host="0.0.0.0", port=5000)
