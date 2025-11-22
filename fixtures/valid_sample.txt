@@ -1,0 +1,6 @@
+ABSTRACT
+    A system and method for distributed consensus in a network of unreliable processors. 
+    The system utilizes a leader-follower architecture where the leader coordinates 
+    state updates across the cluster. In the event of a partition, a new leader 
+    election protocol is triggered. This ensures high availability and consistency 
+    specifically for time-series data ingestion pipelines.

@@ -1,0 +1,4 @@
+# FastAPI for AI service
+fastapi
+uvicorn
+# Add more as needed for NLP simulation
