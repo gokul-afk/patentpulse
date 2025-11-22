@@ -1,0 +1,42 @@
+# Ignore Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore Go build artifacts
+*.exe
+*.out
+*.test
+
+# Ignore node_modules and build
+node_modules/
+dist/
+build/
+
+# Ignore environment files
+.env
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
+
+# Ignore logs
+*.log
+
+# Ignore coverage
+coverage/
+*.lcov
+
+# Ignore IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore frontend artifacts
+*.lock
+
+# Ignore generated files
+*.pdf
+*.docx
