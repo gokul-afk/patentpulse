@@ -72,10 +72,19 @@ async def analyze(request: AnalyzeRequest):
     
     # 1. Run the Chaos Simulation
     simulate_ai_processing()
-    
-    # 2. Perform Analysis
+
+    # 2. Corrupted PDF detection: if content is empty or too short, treat as corrupted
+    if not request.content or len(request.content.strip()) < 20:
+        print("❌ Detected possible corrupted or empty PDF.")
+        return {
+            "risk_score": -1,
+            "keywords": None,
+            "error": "Corrupted or unreadable PDF detected"
+        }
+
+    # 3. Perform Analysis
     score, keywords = analyze_text(request.content)
-    
+
     print(f"✅ Processed: Risk {score} | Keywords {keywords}")
     return {
         "risk_score": score, 

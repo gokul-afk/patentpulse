@@ -42,7 +42,7 @@ type Job struct {
 }
 
 // Global Job Queue
-var jobQueue = make(chan Job, 10) // Buffer of 10 jobs
+var jobQueue = make(chan Job, MaxConcurrent) // Buffer matches worker count
 
 func main() {
 	// 1. Start the Worker Pool (The Engine)
@@ -72,6 +72,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	file, header, err := r.FormFile("document")
 	if err != nil {
+		// Check for file size error
+		if err.Error() == "http: request body too large" {
+			http.Error(w, "File too large (max 10MB)", http.StatusRequestEntityTooLarge)
+			return
+		}
 		http.Error(w, "Invalid file upload: "+err.Error(), http.StatusBadRequest)
 		return
 	}
